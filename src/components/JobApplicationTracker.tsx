@@ -1,32 +1,56 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Switch } from "@/components/ui/switch"
-import AddRowForm from "./AddRowForm"
-import StatusTimeline from "./StatusTimeline"
-import EditStatusModal from "./EditStatusModal"
-import StatusBadge from "./StatusBadge"
-import FilterBar from "./FilterBar"
-import { ConfirmationModal } from "./ConfirmationModal"
-import type { JobApplication, Interview } from "@/types"
+import { useState, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch";
+import AddRowForm from "./AddRowForm";
+import StatusTimeline from "./StatusTimeline";
+import EditStatusModal from "./EditStatusModal";
+import StatusBadge from "./StatusBadge";
+import FilterBar from "./FilterBar";
+import { ConfirmationModal } from "./ConfirmationModal";
+import type { JobApplication, Interview } from "@/types";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
-const initialData: JobApplication[] = []
+const initialData: JobApplication[] = [];
 
 export default function JobApplicationTracker() {
-  const [applications, setApplications] = useState<JobApplication[]>(initialData)
-  const [interviews, setInterviews] = useState<Interview[]>([])
-  const [isAddingRow, setIsAddingRow] = useState(false)
-  const [editingApplication, setEditingApplication] = useState<JobApplication | null>(null)
-  const [isPublic, setIsPublic] = useState(false)
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false)
-  const [pendingVisibilityChange, setPendingVisibilityChange] = useState(false)
+  const [applications, setApplications] =
+    useState<JobApplication[]>(initialData);
+  const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [isAddingRow, setIsAddingRow] = useState(false);
+  const [editingApplication, setEditingApplication] =
+    useState<JobApplication | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [pendingVisibilityChange, setPendingVisibilityChange] = useState(false);
+
+  const session = useSession();
+  const router = useRouter();
+  const loggedIn = session?.status === "authenticated";
 
   // Filter states
-  const [companyFilter, setCompanyFilter] = useState("")
-  const [dateFilter, setDateFilter] = useState("")
-  const [statusFilter, setStatusFilter] = useState("All")
+  const [companyFilter, setCompanyFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  const addEntry = () => {
+    // if user is not logged in, redirect to sign in
+    if (!loggedIn) {
+      router.push("/signin");
+      return;
+    }
+    setIsAddingRow(true);
+  };
 
   const addApplication = (newApplication: JobApplication) => {
     setApplications([
@@ -35,61 +59,78 @@ export default function JobApplicationTracker() {
         ...newApplication,
         statusHistory: [{ status: "Saved", date: newApplication.date }],
       },
-    ])
-    setIsAddingRow(false)
-  }
+    ]);
+    setIsAddingRow(false);
+  };
 
-  const updateApplicationStatus = (id: string, newStatus: string, statusDate: string) => {
+  const updateApplicationStatus = (
+    id: string,
+    newStatus: string,
+    statusDate: string
+  ) => {
     setApplications(
       applications.map((app) => {
         if (app.id === id) {
-          const updatedHistory = [...(app.statusHistory || []), { status: newStatus, date: statusDate }]
-          return { ...app, status: newStatus, statusHistory: updatedHistory }
+          const updatedHistory = [
+            ...(app.statusHistory || []),
+            { status: newStatus, date: statusDate },
+          ];
+          return { ...app, status: newStatus, statusHistory: updatedHistory };
         }
-        return app
-      }),
-    )
-  }
+        return app;
+      })
+    );
+  };
 
   const addInterview = (newInterview: Omit<Interview, "id">) => {
-    const interview: Interview = { ...newInterview, id: Date.now().toString() }
-    setInterviews([...interviews, interview])
+    const interview: Interview = { ...newInterview, id: Date.now().toString() };
+    setInterviews([...interviews, interview]);
     setApplications(
       applications.map((app) =>
-        app.id === newInterview.jobApplicationId ? { ...app, interviews: [...(app.interviews || []), interview] } : app,
-      ),
-    )
-  }
+        app.id === newInterview.jobApplicationId
+          ? { ...app, interviews: [...(app.interviews || []), interview] }
+          : app
+      )
+    );
+  };
 
   const clearFilters = () => {
-    setCompanyFilter("")
-    setDateFilter("")
-    setStatusFilter("All")
-  }
+    setCompanyFilter("");
+    setDateFilter("");
+    setStatusFilter("All");
+  };
 
   const handleVisibilityToggle = () => {
-    setPendingVisibilityChange(!isPublic)
-    setShowConfirmationModal(true)
-  }
+    // if user is not signed in, redirect to signin
+    if (!loggedIn) {
+      router.push("signin");
+      return;
+    }
+    setPendingVisibilityChange(!isPublic);
+    setShowConfirmationModal(true);
+  };
 
   const confirmVisibilityChange = () => {
-    setIsPublic(pendingVisibilityChange)
-    setShowConfirmationModal(false)
-  }
+    setIsPublic(pendingVisibilityChange);
+    setShowConfirmationModal(false);
+  };
 
   const cancelVisibilityChange = () => {
-    setPendingVisibilityChange(isPublic)
-    setShowConfirmationModal(false)
-  }
+    setPendingVisibilityChange(isPublic);
+    setShowConfirmationModal(false);
+  };
 
   const filteredApplications = useMemo(() => {
     return applications.filter((app) => {
-      const matchesCompany = app.companyName.toLowerCase().includes(companyFilter.toLowerCase())
-      const matchesDate = !dateFilter || app.date === dateFilter
-      const matchesStatus = statusFilter === "All" || app.status === statusFilter
-      return matchesCompany && matchesDate && matchesStatus
-    })
-  }, [applications, companyFilter, dateFilter, statusFilter])
+      const matchesCompany = app.companyName
+        .toLowerCase()
+        .includes(companyFilter.toLowerCase());
+      const matchesDate = !dateFilter || app.date === dateFilter;
+      const matchesStatus =
+        statusFilter === "All" || app.status === statusFilter;
+      return matchesCompany && matchesDate && matchesStatus;
+    });
+  }, [applications, companyFilter, dateFilter, statusFilter]);
 
   return (
     <div className="space-y-6">
@@ -97,16 +138,25 @@ export default function JobApplicationTracker() {
         <h1 className="text-2xl font-semibold text-gray-900">My Sheet</h1>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">{isPublic ? "Public" : "Private"}</span>
-            <Switch checked={isPublic} onCheckedChange={handleVisibilityToggle} aria-label="Toggle sheet visibility" />
+            <span className="text-sm font-medium">
+              {isPublic ? "Public" : "Private"}
+            </span>
+            <Switch
+              checked={isPublic}
+              onCheckedChange={handleVisibilityToggle}
+              aria-label="Toggle sheet visibility"
+            />
           </div>
-          <Button onClick={() => setIsAddingRow(true)}>Add Entry</Button>
+          <Button onClick={addEntry}>Add Entry</Button>
         </div>
       </div>
 
       {isAddingRow && (
         <div className="border rounded-lg p-4 bg-gray-50">
-          <AddRowForm onSubmit={addApplication} onCancel={() => setIsAddingRow(false)} />
+          <AddRowForm
+            onSubmit={addApplication}
+            onCancel={() => setIsAddingRow(false)}
+          />
         </div>
       )}
 
@@ -150,7 +200,10 @@ export default function JobApplicationTracker() {
                   <StatusBadge status={app.status} />
                 </TableCell>
                 <TableCell>
-                  <StatusTimeline statusHistory={app.statusHistory} onEditStatus={() => setEditingApplication(app)} />
+                  <StatusTimeline
+                    statusHistory={app.statusHistory}
+                    onEditStatus={() => setEditingApplication(app)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -172,9 +225,14 @@ export default function JobApplicationTracker() {
         onClose={cancelVisibilityChange}
         onConfirm={confirmVisibilityChange}
         title="Change Sheet Visibility"
-        description={`Are you sure you want to make your sheet ${pendingVisibilityChange ? "public" : "private"}? This will ${pendingVisibilityChange ? "allow others to view" : "prevent others from viewing"} your job applications.`}
+        description={`Are you sure you want to make your sheet ${
+          pendingVisibilityChange ? "public" : "private"
+        }? This will ${
+          pendingVisibilityChange
+            ? "allow others to view"
+            : "prevent others from viewing"
+        } your job applications.`}
       />
     </div>
-  )
+  );
 }
-
