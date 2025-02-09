@@ -1,6 +1,7 @@
 import PublicUserTracker from "@/components/PublicUserTracker"
 
-export default function UserTrackerPage({ params }: { params: { userId: string } }) {
-  return <PublicUserTracker userId={params.userId} />
+export default async function UserTrackerPage({ params }: { params: { userId: string } }) {
+  const { userId } = await params;
+  return <PublicUserTracker userId={userId} />
 }
 
