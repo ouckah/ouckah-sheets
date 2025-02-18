@@ -67,16 +67,16 @@ export default function Profile() {
   const session = useSession();
   const user = session?.data?.user
 
-  const fetchProfile = async () => {
+  const fetchUserProfile = async (userEmail: string): Promise<ProfileData | null> => {
     try {
-      console.log(session)
-      const request = await fetch(`/api/user/get/${user?.email}`);
+      const request = await fetch(`/api/user/get/${userEmail}`);
       const data = await request.json();
       const profile = data.user;
 
-      setProfile(profile);
+      return profile;
     } catch (error) {
       console.error("Error fetching profile:", error);
+      return null;
     }
   }
 
@@ -169,10 +169,21 @@ export default function Profile() {
 
   // useEffect to fetch the user's profile information
   useEffect(() => {
-    if (session.status === "loading") return; // wait for session to load
-    if (session.status === "authenticated" && user?.email) {
-      fetchProfile();
+    const loadProfile = async () => {
+      // setIsLoading(true)
+      if (session.status === "loading") return; // wait for session to load
+      if (session.status === "authenticated" && user?.email) {
+        const data = await fetchUserProfile(user?.email);
+        if (data) {
+          setProfile(data);
+        } else {
+          console.error("Failed to load profile");
+        }
+      }
+      // setIsLoading(false)
     }
+
+    loadProfile()
   }, [session.status, user?.email]);
   
 
