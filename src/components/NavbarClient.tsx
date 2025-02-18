@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Session } from "next-auth";
 import { signOut } from "next-auth/react";
-import Image from "next/image";
+import { Settings, User } from "lucide-react";
 
 interface NavbarClientProps {
   session: Session | null;
@@ -56,13 +58,26 @@ export function NavbarClient({ session }: NavbarClientProps) {
             {session?.user ? (
               <>
                 {session.user.name && session.user.image && (
-                  <Image
-                    src={session.user.image}
-                    alt={session.user.name}
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-8 w-8 p-2 rounded-full">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={session.user.image} alt="Profile" />
+                          <AvatarFallback>{session.user.name}</AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <User className="mr-2 h-4 w-4" />
+                        <Link href="/profile">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Settings className="mr-2 h-4 w-4" />
+                        <Link href="/settings">Settings</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
                 <Button variant="outline" onClick={handleSignOut}>
                   Sign Out

@@ -133,7 +133,7 @@ export default function PublicUserTracker({ userId }: PublicUserTrackerProps) {
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent">
+            <TableRow>
               <TableHead className="w-[200px]">Company</TableHead>
               <TableHead>Date Added</TableHead>
               <TableHead>Status</TableHead>
@@ -142,24 +142,24 @@ export default function PublicUserTracker({ userId }: PublicUserTrackerProps) {
           </TableHeader>
           <TableBody>
             {filteredApplications.map((app) => (
-              <TableRow key={app.id}>
-                <TableCell className="align-top">
+              <TableRow key={app.id} className="py-4">
+                <TableCell className="py-4 align-top">
                   <div className="space-y-1">
                     <div className="font-medium">{app.companyName}</div>
                     <div className="text-sm text-gray-500">{app.location}</div>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-4">
                   {new Date(app.date).toLocaleDateString("en-US", {
                     month: "numeric",
                     day: "numeric",
                     year: "2-digit",
                   })}
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-4">
                   <StatusBadge status={app.status} />
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-4">
                   <StatusTimeline statusHistory={app.statusHistory} />
                 </TableCell>
               </TableRow>
