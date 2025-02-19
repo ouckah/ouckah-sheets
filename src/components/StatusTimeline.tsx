@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { ChevronDown } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const stages = [
-  { name: "Saved", color: "bg-blue-100" },
-  { name: "Applied", color: "bg-blue-100" },
-  { name: "Screen", color: "bg-blue-100" },
-  { name: "Interview", color: "bg-blue-100" },
-  { name: "Offer", color: "bg-blue-100" },
+  { name: "Saved", color: "bg-gray-200" },
+  { name: "Applied", color: "bg-blue-200" },
+  { name: "Screen", color: "bg-purple-200" },
+  { name: "Interview", color: "bg-yellow-200" },
+  { name: "Offer", color: "bg-green-200" },
 ]
 
 type StatusTimelineProps = {
@@ -15,53 +16,44 @@ type StatusTimelineProps = {
 }
 
 export default function StatusTimeline({ statusHistory = [], onEditStatus }: StatusTimelineProps) {
-  return (
-    <div className="flex items-center gap-4">
-      {/* Timeline */}
-      <div className="flex-1 relative">
-        {/* Horizontal line connecting all points */}
-        <div className="absolute h-[2px] bg-gray-200 left-0 right-0 top-1/2 -translate-y-1/2" />
+  const lastStatus = statusHistory[statusHistory.length - 1]
 
-        {/* Stage points */}
-        <div className="relative flex justify-between items-center h-10">
+  return (
+    <div className="flex items-start justify-between">
+      <div className="flex-grow relative px-4">
+        <div className="absolute left-6 top-0 h-full w-px bg-gray-200" />
+        <ul className="space-y-2">
           {stages.map((stage, index) => {
             const historyEntry = statusHistory.find((h) => h.status === stage.name)
             const isActive = !!historyEntry
+            const isCurrent = lastStatus && lastStatus.status === stage.name
 
             return (
-              <div key={stage.name} className="flex flex-col">
-                {/* Stage name */}
-                <span className="text-xs text-gray-600 mb-2">{stage.name}</span>
-
-                {/* Circle */}
+              <li key={stage.name} className="relative pl-8">
                 <div
-                  className={`w-4 h-4 rounded-full border-2 relative z-10 ${
-                    isActive ? "bg-blue-400 border-blue-400" : "bg-white border-gray-300"
-                  }`}
+                  className={cn(
+                    "absolute left-0 top-1 h-4 w-4 rounded-full border-2 border-white",
+                    isActive ? stage.color : "bg-gray-100",
+                  )}
                 />
-
-                {/* Date */}
-                {historyEntry && (
-                  <span className="text-xs text-gray-500 mt-2">
-                    {new Date(historyEntry.date).toLocaleDateString("en-US", {
-                      month: "numeric",
-                      day: "numeric",
-                      year: "2-digit",
-                    })}
-                  </span>
-                )}
-              </div>
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-sm", isCurrent ? "font-semibold" : "text-gray-500")}>{stage.name}</span>
+                  {historyEntry && (
+                    <span className="text-xs text-gray-400">{new Date(historyEntry.date).toLocaleDateString()}</span>
+                  )}
+                </div>
+              </li>
             )
           })}
-        </div>
+        </ul>
       </div>
-
-      {/* Status button - only show if onEditStatus is provided */}
       {onEditStatus && (
-        <Button variant="outline" size="sm" onClick={onEditStatus} className="text-sm shrink-0">
-          Status
-          <ChevronDown className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="ml-4">
+          <Button variant="outline" size="sm" onClick={onEditStatus} className="text-sm whitespace-nowrap">
+            Update
+            <ChevronDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       )}
     </div>
   )

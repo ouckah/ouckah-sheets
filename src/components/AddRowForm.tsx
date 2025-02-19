@@ -1,16 +1,12 @@
+"use client"
+
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { JobApplication } from "./JobApplicationTracker"
-
-const companyOptions = [
-  { name: "Google", logo: "/logos/google.png" },
-  { name: "Microsoft", logo: "/logos/microsoft.png" },
-  { name: "Apple", logo: "/logos/apple.png" },
-  { name: "Amazon", logo: "/logos/amazon.png" },
-  { name: "Facebook", logo: "/logos/facebook.png" },
-]
+import type { JobApplication } from "@/types"
 
 const statusOptions = ["Saved", "Applied", "Screen", "Interview", "Offer"]
 
@@ -20,8 +16,9 @@ type AddRowFormProps = {
 }
 
 export default function AddRowForm({ onSubmit, onCancel }: AddRowFormProps) {
+  const today = new Date().toISOString().split("T")[0]
   const [companyName, setCompanyName] = useState("")
-  const [date, setDate] = useState("")
+  const [date, setDate] = useState(today)
   const [location, setLocation] = useState("")
   const [status, setStatus] = useState("Saved")
 
@@ -43,21 +40,13 @@ export default function AddRowForm({ onSubmit, onCancel }: AddRowFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Company</label>
-          <Select onValueChange={setCompanyName}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select company" />
-            </SelectTrigger>
-            <SelectContent>
-              {companyOptions.map((company) => (
-                <SelectItem key={company.name} value={company.name}>
-                  <div className="flex items-center">
-                    <img src={company.logo || "/placeholder.svg"} alt={company.name} className="w-6 h-6 mr-2" />
-                    {company.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            type="text"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            placeholder="Enter company name"
+            required
+          />
         </div>
 
         <div className="space-y-2">

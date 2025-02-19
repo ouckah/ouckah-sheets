@@ -1,4 +1,4 @@
-import PublicUserTracker from "@/components/PublicUserTracker"
+import PublicUserTracker from "@/components/PublicSheet"
 
 export default async function UserTrackerPage({ params }: { params: { userId: string } }) {
   const { userId } = await params;

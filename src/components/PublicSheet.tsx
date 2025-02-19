@@ -15,67 +15,29 @@ export type PublicJobApplication = {
   statusHistory?: { status: string; date: string }[]
 }
 
-type PublicUserTrackerProps = {
+export type PublicSheet = { 
+  title: string
+  applications: PublicJobApplication[]
+  visibility: boolean
+}
+
+type PublicSheetProps = {
   userId: string
 }
 
-// This would be replaced with an actual API call in a real application
-const fetchUserData = async (userId: string): Promise<{ userName: string; applications: PublicJobApplication[] }> => {
-  // Simulating an API call
-  await new Promise((resolve) => setTimeout(resolve, 500))
+const fetchSheetData = async (userId: string): Promise<PublicSheet> => {
+  const request = await fetch(`/api/sheet/getById/${userId}`);
+  const data = await request.json();
+  console.log(data)
+  const sheet = data.sheet;
 
-  const dummyUserData: Record<string, { userName: string; applications: PublicJobApplication[] }> = {
-    user1: {
-      userName: "Alice",
-      applications: [
-        {
-          id: "1",
-          companyName: "Tech Giants Inc.",
-          date: "2025-01-15",
-          location: "San Francisco, CA",
-          status: "Interview",
-          statusHistory: [
-            { status: "Applied", date: "2025-01-15" },
-            { status: "Screen", date: "2025-01-20" },
-            { status: "Interview", date: "2025-01-25" },
-          ],
-        },
-        {
-          id: "2",
-          companyName: "Startup Innovators",
-          date: "2025-01-10",
-          location: "New York, NY",
-          status: "Offer",
-          statusHistory: [
-            { status: "Applied", date: "2025-01-10" },
-            { status: "Screen", date: "2025-01-18" },
-            { status: "Interview", date: "2025-01-22" },
-            { status: "Offer", date: "2025-01-30" },
-          ],
-        },
-      ],
-    },
-    user2: {
-      userName: "Bob",
-      applications: [
-        {
-          id: "3",
-          companyName: "Global Solutions Ltd.",
-          date: "2025-01-20",
-          location: "London, UK",
-          status: "Applied",
-          statusHistory: [{ status: "Applied", date: "2025-01-20" }],
-        },
-      ],
-    },
-  }
-
-  return dummyUserData[userId] || { userName: "Unknown User", applications: [] }
+  return sheet;
 }
 
-export default function PublicUserTracker({ userId }: PublicUserTrackerProps) {
-  const [userName, setUserName] = useState<string>("")
+export default function PublicSheet({ userId }: PublicSheetProps) {
+  const [title, setTitle] = useState<string>("")
   const [applications, setApplications] = useState<PublicJobApplication[]>([])
+  const [isPublic, setIsPublic] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState(true)
 
   // Filter states
@@ -86,9 +48,11 @@ export default function PublicUserTracker({ userId }: PublicUserTrackerProps) {
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
-      const data = await fetchUserData(userId)
-      setUserName(data.userName)
+      const data = await fetchSheetData(userId)
+      console.log(data);
+      setTitle(data.title)
       setApplications(data.applications)
+      setIsPublic(data.visibility)
       setIsLoading(false)
     }
 
@@ -114,10 +78,14 @@ export default function PublicUserTracker({ userId }: PublicUserTrackerProps) {
     return <div>Loading...</div>
   }
 
+  if (!isPublic) {
+    return <div>Private Sheet.</div>
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">{userName}&apos;s Sheet</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
       </div>
 
       <FilterBar

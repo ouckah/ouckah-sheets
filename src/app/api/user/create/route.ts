@@ -10,6 +10,7 @@ export async function POST(req: Request) {
     const client = await clientPromise;
     const db = client.db("user-information");
     const users = db.collection("users");
+    const sheets = db.collection("sheets");
 
     const { email, name, image: pfp } = await req.json();
 
@@ -40,7 +41,17 @@ export async function POST(req: Request) {
       createdAt: new Date(),
     });
 
-    return NextResponse.json({ message: "User created", user: newUser }, { status: 201 });
+    // create associated sheet
+    const newSheet = await sheets.insertOne({
+      userId: newUser.insertedId, // reference to user
+      title: `${name}'s Sheet`,
+      applications: [],
+      visibility: false,
+      createdAt: new Date(),
+      lastUpdated: new Date(),
+    });
+
+    return NextResponse.json({ message: "User created", user: newUser, sheet: newSheet }, { status: 201 });
   } catch (error) {
     console.error("Database connection error:", error);
     return NextResponse.json({ message: "Internal Server Error", error: (error as Error).message }, { status: 500 });
