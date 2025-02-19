@@ -23,7 +23,7 @@ const dummyUsers: PublicUser[] = [
 
 export default function ExploreList() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [users, setUsers] = useState<PublicUser[]>(dummyUsers)
+  const users = dummyUsers // const [users, setUsers] = useState<PublicUser[]>(dummyUsers)
 
   const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(searchTerm.toLowerCase()))
 

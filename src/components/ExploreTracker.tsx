@@ -61,7 +61,7 @@ const dummyPublicData: PublicJobApplication[] = [
 ]
 
 export default function ExploreTracker() {
-  const [applications, setApplications] = useState<PublicJobApplication[]>(dummyPublicData)
+  const applications = dummyPublicData // const [applications, setApplications] = useState<PublicJobApplication[]>(dummyPublicData)
 
   // Filter states
   const [companyFilter, setCompanyFilter] = useState("")

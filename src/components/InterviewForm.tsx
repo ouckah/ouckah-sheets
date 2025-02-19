@@ -48,6 +48,7 @@ export function InterviewForm({
   onSubmit,
 }: InterviewFormProps) {
   const [interview, setInterview] = useState<Omit<Interview, "id">>({
+    userId: "",
     jobApplicationId: "",
     date: "",
     time: "",

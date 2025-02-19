@@ -15,7 +15,7 @@ export default function SigninForm() {
   const handleSignin = async () => {
     const userSession = await handleGoogleSignin();
     if (userSession) {
-      await handleUserSignin(userSession);
+      await handleUserSignin();
     }
   };
   const handleUserSignin = async () => {

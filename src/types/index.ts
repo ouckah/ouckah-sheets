@@ -1,6 +1,7 @@
 export type Interview = {
   id: string
   userId: string,
+  userEmail?: string,
   jobApplicationId: string
   date: string
   time: string

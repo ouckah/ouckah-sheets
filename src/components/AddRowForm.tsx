@@ -27,6 +27,7 @@ export default function AddRowForm({ onSubmit, onCancel }: AddRowFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const newApplication: JobApplication = {
+      id: Date.now().toString(),
       companyName,
       position,
       date,

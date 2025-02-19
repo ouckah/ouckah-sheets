@@ -97,6 +97,7 @@ export default function InterviewsPage() {
         description: `Interview scheduled for ${new Date(addedInterview.date).toLocaleDateString()} at ${addedInterview.time}`,
       });
     } catch (error) {
+      console.error(error)
       toast({
         title: "Error",
         description: "Failed to schedule interview. Please try again.",
@@ -122,7 +123,6 @@ export default function InterviewsPage() {
   const filteredInterviews = useMemo(() => {
     const now = new Date()
     const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
     return interviews.filter((interview) => {
       const interviewDate = new Date(interview.date)
@@ -153,7 +153,7 @@ export default function InterviewsPage() {
   const confirmVisibilityChange = () => {
     setIsPublic(pendingVisibilityChange)
     setShowConfirmationModal(false)
-    // Here you would typically update this setting in your backend
+    // TODO: update this setting in backend
     toast({
       title: pendingVisibilityChange ? "Interviews set to public" : "Interviews set to private",
       description: pendingVisibilityChange

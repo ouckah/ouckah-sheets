@@ -16,7 +16,7 @@ export default function StatusTimeline({ statusHistory = [], onEditStatus }: Sta
       <div className="flex-grow relative px-4">
         <div className="absolute left-6 top-0 h-full w-px bg-gray-200" />
         <ul className="space-y-2">
-          {applicationStages.map((stage, index) => {
+          {applicationStages.map((stage) => {
             const historyEntry = statusHistory.find((h) => h.status === stage.name)
             const isActive = !!historyEntry
             const isCurrent = lastStatus && lastStatus.status === stage.name
