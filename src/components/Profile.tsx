@@ -64,6 +64,7 @@ const initialProfile: ProfileData = {
 
 export default function Profile() {
   const [profile, setProfile] = useState<ProfileData>(initialProfile);
+  const [isLoading, setIsLoading] = useState(false);
   const session = useSession();
   const user = session?.data?.user
 
@@ -170,7 +171,7 @@ export default function Profile() {
   // useEffect to fetch the user's profile information
   useEffect(() => {
     const loadProfile = async () => {
-      // setIsLoading(true)
+      setIsLoading(true)
       if (session.status === "loading") return; // wait for session to load
       if (session.status === "authenticated" && user?.email) {
         const data = await fetchUserProfile(user?.email);
@@ -180,12 +181,14 @@ export default function Profile() {
           console.error("Failed to load profile");
         }
       }
-      // setIsLoading(false)
+      setIsLoading(false)
     }
 
     loadProfile()
   }, [session.status, user?.email]);
   
+  if (isLoading) 
+    return <div>Loading...</div>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

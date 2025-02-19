@@ -6,8 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Github, Linkedin, FileSpreadsheet, Calendar } from "lucide-react"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 type ProfileData = {
+  email: string,
   name: string
   firstName: string
   lastName: string
@@ -29,6 +31,8 @@ type PublicProfileProps = {
 export default function PublicProfile({ userId }: PublicProfileProps) {
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const session = useSession()
+  const isOwnProfile = session && profile?.email === session?.data?.user?.email
 
   const fetchUserProfile = async (userId: string): Promise<ProfileData> => {
     const request = await fetch(`/api/user/getById/${userId}`);
@@ -76,6 +80,13 @@ export default function PublicProfile({ userId }: PublicProfileProps) {
                 </CardTitle>
                 <CardDescription>{profile.location}</CardDescription>
               </div>
+              {isOwnProfile && (
+                <Link href="/profile">
+                  <Button variant="outline" size="sm">
+                    Edit Profile
+                  </Button>
+                </Link>
+              )}
             </div>
           </CardHeader>
           <CardContent>
