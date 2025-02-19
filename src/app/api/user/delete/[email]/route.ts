@@ -6,14 +6,14 @@ import clientPromise from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ email: string }> }) {
   try {
+    const { email } = await params;
+    
     const client = await clientPromise;
     const db = client.db("user-information");
     const users = db.collection("users");
     const sheets = db.collection("sheets");
-
-    const { email } = await req.json();
 
     if (!email) {
       return NextResponse.json({ message: "Email is required" }, { status: 400 });

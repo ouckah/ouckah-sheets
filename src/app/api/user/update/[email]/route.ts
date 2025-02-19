@@ -5,9 +5,9 @@ export const config = {
 import clientPromise from '@/lib/mongodb'
 import { NextResponse } from 'next/server';
 
-export async function PUT(req: Request, context: { params: { email: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ email: string }> }) {
   try {
-    const { email } = await context.params;
+    const { email } = await params;
     const newProfile = await req.json();
 
     const client = await clientPromise
