@@ -44,6 +44,7 @@ export const {
         async signIn({ user }) {
             const userCreated = await createUserInDatabase(user);
             return userCreated;
-          },
-      },
+        },
+    },
+    debug: true,
 })
