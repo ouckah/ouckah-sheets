@@ -83,6 +83,8 @@ export function InterviewForm({
     }
     onSubmit(interview);
     setInterview({
+      userId: "",
+      userEmail: "",
       jobApplicationId: "",
       date: "",
       time: "",

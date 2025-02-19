@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { InterviewCalendar } from "@/components/InterviewCalendar"
 import { InterviewForm } from "@/components/InterviewForm"
 import { InterviewList } from "@/components/InterviewList"
@@ -10,105 +10,100 @@ import { Label } from "@/components/ui/label"
 import { ConfirmationModal } from "@/components/ConfirmationModal"
 import type { Interview, JobApplication } from "@/types"
 import { toast } from "@/hooks/use-toast"
-
-// Mock data for job applications
-const mockJobApplications: JobApplication[] = [
-  { id: "1", companyName: "Tech Corp", date: "2025-02-01", location: "New York, NY", status: "Applied" },
-  { id: "2", companyName: "Innovate Inc", date: "2025-02-05", location: "San Francisco, CA", status: "Interview" },
-]
-
-// Mock data for interviews
-const mockInterviews: Interview[] = [
-  {
-    id: "1",
-    jobApplicationId: "1",
-    date: "2025-02-15",
-    time: "10:00 AM",
-    interviewerName: "John Doe",
-    interviewType: "Video",
-    notes: "Prepare for technical questions",
-  },
-  {
-    id: "2",
-    jobApplicationId: "2",
-    date: "2025-02-20",
-    time: "2:00 PM",
-    interviewerName: "Jane Smith",
-    interviewType: "In-person",
-    notes: "Bring portfolio",
-  },
-  {
-    id: "3",
-    jobApplicationId: "1",
-    date: "2025-02-18",
-    time: "11:00 AM",
-    interviewerName: "Alice Johnson",
-    interviewType: "Phone",
-    notes: "Discuss salary expectations",
-  },
-  {
-    id: "4",
-    jobApplicationId: "2",
-    date: "2025-03-05",
-    time: "3:30 PM",
-    interviewerName: "Bob Williams",
-    interviewType: "Video",
-    notes: "Second round interview",
-  },
-]
+import { useSession } from "next-auth/react"
 
 type DateRangeOption = "all" | "today" | "thisWeek" | "thisMonth" | "custom"
 
-// Mock API call
-const mockAddInterview = async (interview: Omit<Interview, "id">): Promise<Interview> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newInterview: Interview = {
-        ...interview,
-        id: Date.now().toString(),
-      }
-      resolve(newInterview)
-    }, 500) // Simulate a 500ms delay
-  })
-}
+const fetchJobApplications = async (email: string) => {
+  try {
+    const response = await fetch(`/api/sheet/get/${email}`);
+    if (!response.ok) throw new Error("Failed to fetch job applications");
+    const data = await response.json();
+
+    const sheet = data.sheet;
+    const jobApplications = sheet.applications;
+    return jobApplications;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+const fetchInterviews = async (email: string) => {
+  try {
+    const response = await fetch(`/api/interview/get/${email}`);
+    if (!response.ok) throw new Error("Failed to fetch interviews");
+    const data = await response.json();
+
+    const interviews = data.interviews;
+    return interviews;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
 
 export default function InterviewsPage() {
-  const [interviews, setInterviews] = useState<Interview[]>(mockInterviews)
+  const { data: session, status } = useSession();
+  const [interviews, setInterviews] = useState<Interview[]>([])
+  const [jobApplications, setJobApplications] = useState<JobApplication[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [dateRange, setDateRange] = useState<DateRangeOption>("all")
   const [isPublic, setIsPublic] = useState(false)
   const [showConfirmationModal, setShowConfirmationModal] = useState(false)
   const [pendingVisibilityChange, setPendingVisibilityChange] = useState(false)
 
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.email) {
+      const loadData = async () => {
+        const [fetchedJobApplications, fetchedInterviews] = await Promise.all([
+          fetchJobApplications(session.user?.email as string),
+          fetchInterviews(session.user?.email as string),
+        ]);
+        setJobApplications(fetchedJobApplications);
+        setInterviews(fetchedInterviews);
+      };
+
+      loadData();
+    }
+  }, [session, status]);
+
   const handleAddInterview = async (newInterview: Omit<Interview, "id">) => {
     try {
-      // Mock API call
-      const addedInterview = await mockAddInterview(newInterview)
+      if (session?.user?.email) {
+        newInterview.userEmail = session?.user?.email;
+      }
 
-      // Update state with the new interview and sort
-      setInterviews((prevInterviews) => {
-        const updatedInterviews = [...prevInterviews, addedInterview]
-        return updatedInterviews.sort((a, b) => {
-          const dateA = new Date(`${a.date}T${a.time}`)
-          const dateB = new Date(`${b.date}T${b.time}`)
-          return dateA.getTime() - dateB.getTime()
+      const response = await fetch(`/api/interview/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newInterview),
+      });
+
+      if (!response.ok) throw new Error("Failed to schedule interview");
+
+      const addedInterview = await response.json();
+
+      setInterviews((prevInterviews) =>
+        [...prevInterviews, addedInterview].sort((a, b) => {
+          const dateA = new Date(`${a.date}T${a.time}`);
+          const dateB = new Date(`${b.date}T${b.time}`);
+          return dateA.getTime() - dateB.getTime();
         })
-      })
+      );
 
-      // Show success toast
       toast({
         title: "Interview Scheduled",
         description: `Interview scheduled for ${new Date(addedInterview.date).toLocaleDateString()} at ${addedInterview.time}`,
-      })
+      });
     } catch (error) {
-      // Show error toast
       toast({
         title: "Error",
         description: "Failed to schedule interview. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date)
@@ -188,14 +183,14 @@ export default function InterviewsPage() {
           <div className="mt-6">
             <InterviewList
               interviews={filteredInterviews}
-              jobApplications={mockJobApplications}
+              jobApplications={jobApplications}
               dateRange={dateRange}
               selectedDate={selectedDate}
             />
           </div>
         </div>
         <div>
-          <InterviewForm jobApplications={mockJobApplications} onSubmit={handleAddInterview} />
+          <InterviewForm jobApplications={jobApplications} onSubmit={handleAddInterview} />
         </div>
       </div>
 
