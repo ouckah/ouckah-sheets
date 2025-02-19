@@ -5,7 +5,7 @@ export const config = {
 import clientPromise from '@/lib/mongodb'
 import { NextResponse } from 'next/server';
 
-export async function GET(req: Request, { params }: { params: { email: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ email: string }> }) {
   try {
     const { email } = await params;
 

@@ -6,7 +6,7 @@ import clientPromise from '@/lib/mongodb'
 import { ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
