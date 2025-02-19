@@ -6,9 +6,10 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { applicationStages } from "@/lib/jobApplication"
 import type { JobApplication } from "@/types"
 
-const statusOptions = ["Saved", "Applied", "Screen", "Interview", "Offer"]
+const statusOptions = applicationStages.map((stage) => stage.name)
 
 type AddRowFormProps = {
   onSubmit: (newApplication: JobApplication) => void
@@ -26,7 +27,6 @@ export default function AddRowForm({ onSubmit, onCancel }: AddRowFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const newApplication: JobApplication = {
-      id: Date.now().toString(),
       companyName,
       position,
       date,

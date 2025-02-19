@@ -1,14 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const stages = [
-  { name: "Applied", color: "bg-gray-200" },
-  { name: "Online Assessment", color: "bg-blue-200" },
-  { name: "Phone Screen", color: "bg-purple-200" },
-  { name: "Interview", color: "bg-yellow-200" },
-  { name: "Offer", color: "bg-green-200" },
-]
+import { applicationStages } from "@/lib/jobApplication"
 
 type StatusTimelineProps = {
   statusHistory?: { status: string; date: string }[]
@@ -23,7 +16,7 @@ export default function StatusTimeline({ statusHistory = [], onEditStatus }: Sta
       <div className="flex-grow relative px-4">
         <div className="absolute left-6 top-0 h-full w-px bg-gray-200" />
         <ul className="space-y-2">
-          {stages.map((stage, index) => {
+          {applicationStages.map((stage, index) => {
             const historyEntry = statusHistory.find((h) => h.status === stage.name)
             const isActive = !!historyEntry
             const isCurrent = lastStatus && lastStatus.status === stage.name

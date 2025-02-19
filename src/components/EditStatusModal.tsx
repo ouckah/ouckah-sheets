@@ -1,11 +1,12 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { applicationStages } from "@/lib/jobApplication"
 import { JobApplication } from "@/types"
 
-const statusOptions = ["Saved", "Applied", "Screen", "Interview", "Offer"]
+const statusOptions = applicationStages.map((stage) => stage.name)
 
 type EditStatusModalProps = {
   isOpen: boolean
@@ -18,8 +19,13 @@ export default function EditStatusModal({ isOpen, onClose, onSave, application }
   const [status, setStatus] = useState(application.status)
   const [statusDate, setStatusDate] = useState("")
 
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0]
+    setStatusDate(today)
+  }, [])
+
   const handleSave = () => {
-    onSave(application.id, status, statusDate)
+    onSave(application._id as string, status, statusDate)
     onClose()
   }
 
