@@ -6,9 +6,9 @@ import clientPromise from '@/lib/mongodb'
 import { ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
 
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await context.params;
+    const { id } = await params;
 
     const client = await clientPromise
     const db = client.db("user-information")
