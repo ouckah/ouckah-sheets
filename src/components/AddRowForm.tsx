@@ -18,6 +18,7 @@ type AddRowFormProps = {
 export default function AddRowForm({ onSubmit, onCancel }: AddRowFormProps) {
   const today = new Date().toISOString().split("T")[0]
   const [companyName, setCompanyName] = useState("")
+  const [position, setPosition] = useState("")
   const [date, setDate] = useState(today)
   const [location, setLocation] = useState("")
   const [status, setStatus] = useState("Saved")
@@ -27,6 +28,7 @@ export default function AddRowForm({ onSubmit, onCancel }: AddRowFormProps) {
     const newApplication: JobApplication = {
       id: Date.now().toString(),
       companyName,
+      position,
       date,
       location,
       status,
@@ -45,6 +47,17 @@ export default function AddRowForm({ onSubmit, onCancel }: AddRowFormProps) {
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             placeholder="Enter company name"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Position</label>
+          <Input
+            type="text"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            placeholder="Enter position title"
             required
           />
         </div>

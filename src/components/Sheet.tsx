@@ -21,6 +21,8 @@ import { ConfirmationModal } from "./ConfirmationModal";
 import type { JobApplication } from "@/types";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Pencil, Trash2 } from "lucide-react";
+import EditJobApplicationModal from "./EditJobApplicationDetailsModal";
 
 type SheetData = {
   title: string
@@ -38,10 +40,13 @@ export default function Sheet() {
   const [isAddingRow, setIsAddingRow] = useState(false);
   const [editingApplication, setEditingApplication] =
     useState<JobApplication | null>(null);
+  const [editingDetails, setEditingDetails] = 
+    useState<JobApplication | null>(null)
   const [isPublic, setIsPublic] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [pendingVisibilityChange, setPendingVisibilityChange] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingApplication, setDeletingApplication] = useState<JobApplication | null>(null)
 
   const session = useSession();
   const user = session?.data?.user
@@ -140,6 +145,34 @@ export default function Sheet() {
   
     setApplications(updatedApplications);
     await updateSheet({ applications: updatedApplications });
+  };
+
+  const updateApplicationDetails = (
+    id: string,
+    updates: { companyName: string; position: string; location: string },
+  ) => {
+    setApplications(
+      applications.map((app) => {
+        if (app.id === id) {
+          return { ...app, ...updates }
+        }
+        return app
+      }),
+    )
+    toast({
+      title: "Application updated",
+      description: "The application details have been updated.",
+    })
+  };
+
+  const deleteApplication = async (application: JobApplication) => {
+    const updatedApplications = applications.filter((app) => app.id !== application.id)
+    setApplications(updatedApplications)
+    toast({
+      title: "Application deleted",
+      description: `The application for ${application.companyName} has been deleted.`,
+    })
+    await updateSheet({ applications: updatedApplications })
   };
 
   const clearFilters = () => {
@@ -279,6 +312,7 @@ export default function Sheet() {
                   <div className="space-y-1">
                     <div className="font-medium">{app.companyName}</div>
                     <div className="text-sm text-gray-500">{app.location}</div>
+                    <div className="text-sm text-gray-400">{app.position}</div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -297,6 +331,24 @@ export default function Sheet() {
                     onEditStatus={() => setEditingApplication(app)}
                   />
                 </TableCell>
+                <TableCell className="flex flex-col items-start">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDeletingApplication(app)}
+                    aria-label={`Delete application for ${app.companyName}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditingDetails(app)}
+                      aria-label={`Edit details for ${app.companyName}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -312,6 +364,15 @@ export default function Sheet() {
         />
       )}
 
+      {editingDetails && (
+        <EditJobApplicationModal
+          isOpen={!!editingDetails}
+          onClose={() => setEditingDetails(null)}
+          onSave={updateApplicationDetails}
+          application={editingDetails}
+        />
+      )}
+
       <ConfirmationModal
         isOpen={showConfirmationModal}
         onClose={cancelVisibilityChange}
@@ -324,6 +385,19 @@ export default function Sheet() {
             ? "allow others to view"
             : "prevent others from viewing"
         } your job applications.`}
+      />
+
+      <ConfirmationModal
+        isOpen={!!deletingApplication}
+        onClose={() => setDeletingApplication(null)}
+        onConfirm={() => {
+          if (deletingApplication) {
+            deleteApplication(deletingApplication)
+            setDeletingApplication(null)
+          }
+        }}
+        title="Delete Application"
+        description={`Are you sure you want to delete the application for ${deletingApplication?.companyName}? This action cannot be undone.`}
       />
     </div>
   );

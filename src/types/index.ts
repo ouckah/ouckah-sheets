@@ -1,5 +1,6 @@
 export type Interview = {
   id: string
+  userId: string,
   jobApplicationId: string
   date: string
   time: string
@@ -11,6 +12,7 @@ export type Interview = {
 export type JobApplication = {
   id: string
   companyName: string
+  position: string
   date: string
   location: string
   status: string
