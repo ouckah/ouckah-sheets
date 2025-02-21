@@ -58,6 +58,7 @@ export function InterviewForm({
   });
   const [openTime, setOpenTime] = useState(false);
   const [timeSearch, setTimeSearch] = useState("");
+  const [openCompany, setOpenCompany] = useState(false);
 
   const session = useSession();
   const loggedIn = session?.status === "authenticated";
@@ -116,95 +117,98 @@ export function InterviewForm({
         <CardTitle>Schedule Interview</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="jobApplicationId">Job Application</Label>
-            <Select
-              value={interview.jobApplicationId}
-              onValueChange={handleSelectChange("jobApplicationId")}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select job application" />
-              </SelectTrigger>
-              <SelectContent>
-                {jobApplications.map((app) => (
-                  <SelectItem key={app._id} value={app._id}>
-                    {app.companyName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="jobApplicationId">Company</Label>
+            <Popover open={openCompany} onOpenChange={setOpenCompany}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openCompany}
+                  className="w-full justify-between"
+                >
+                  {interview.jobApplicationId
+                    ? jobApplications.find((app) => app._id === interview.jobApplicationId)?.companyName
+                    : "Select company..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search company..." />
+                  <CommandList>
+                    <CommandEmpty>No company found.</CommandEmpty>
+                    <CommandGroup>
+                      {jobApplications.map((app) => (
+                        <CommandItem
+                          key={app._id}
+                          onSelect={() => {
+                            setInterview((prev) => ({ ...prev, jobApplicationId: app._id }))
+                            setOpenCompany(false)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              interview.jobApplicationId === app._id ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                          {app.companyName}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                name="date"
-                type="date"
-                required
-                value={interview.date}
-                onChange={handleChange}
-              />
+              <Input id="date" name="date" type="date" required value={interview.date} onChange={handleChange} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="time">Time</Label>
               <Popover
                 open={openTime}
                 onOpenChange={(open) => {
-                  setOpenTime(open);
-                  if (!open) setTimeSearch("");
+                  setOpenTime(open)
+                  if (!open) setTimeSearch("")
                 }}
               >
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openTime}
-                    className="w-full justify-between"
-                  >
+                  <Button variant="outline" role="combobox" aria-expanded={openTime} className="w-full justify-between">
                     {interview.time || "Select time..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                   <Command>
-                    <CommandInput
-                      placeholder="Search time..."
-                      value={timeSearch}
-                      onValueChange={setTimeSearch}
-                    />
+                    <CommandInput placeholder="Search time..." value={timeSearch} onValueChange={setTimeSearch} />
                     <CommandList>
                       <CommandEmpty>No time found.</CommandEmpty>
                       <CommandGroup>
                         {timeOptions
                           .filter((time) => {
-                            const [hourMin] = time.split(" ");
-                            const [hour] = hourMin.split(":");
-                            const searchHour = timeSearch.split(":")[0];
+                            const [hourMin] = time.split(" ")
+                            const [hour] = hourMin.split(":")
+                            const searchHour = timeSearch.split(":")[0]
                             return (
-                              hour.startsWith(searchHour) ||
-                              time
-                                .toLowerCase()
-                                .startsWith(timeSearch.toLowerCase())
-                            );
+                              hour.startsWith(searchHour) || time.toLowerCase().startsWith(timeSearch.toLowerCase())
+                            )
                           })
                           .map((time) => (
                             <CommandItem
                               key={time}
                               onSelect={() => {
-                                handleSelectChange("time")(time);
-                                setOpenTime(false);
-                                setTimeSearch("");
+                                handleSelectChange("time")(time)
+                                setOpenTime(false)
+                                setTimeSearch("")
                               }}
                             >
                               <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  interview.time === time
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
+                                className={cn("mr-2 h-4 w-4", interview.time === time ? "opacity-100" : "opacity-0")}
                               />
                               {time}
                             </CommandItem>
@@ -228,10 +232,7 @@ export function InterviewForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="interviewType">Interview Type</Label>
-            <Select
-              value={interview.interviewType}
-              onValueChange={handleSelectChange("interviewType")}
-            >
+            <Select value={interview.interviewType} onValueChange={handleSelectChange("interviewType")}>
               <SelectTrigger>
                 <SelectValue placeholder="Select interview type" />
               </SelectTrigger>
@@ -244,13 +245,7 @@ export function InterviewForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              name="notes"
-              value={interview.notes}
-              onChange={handleChange}
-              rows={3}
-            />
+            <Textarea id="notes" name="notes" value={interview.notes} onChange={handleChange} rows={3} />
           </div>
         </form>
       </CardContent>
