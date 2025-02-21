@@ -5,27 +5,19 @@ export const config = {
 import clientPromise from '@/lib/mongodb'
 import { NextResponse } from 'next/server';
 
-type JobApplication = {
-  _id: string;
-  companyName: string;
-  date: string;
-  status: string;
-  statusHistory: { status: string; date: string }[];
-}
-
 export async function POST(req: Request) {
   try { 
     const client = await clientPromise;
     const db = client.db("user-information");
     const users = db.collection("users");
-    const sheets = db.collection("sheets");
+    const applications = db.collection("applications");
     const interviews = db.collection("interviews");
 
     const newInterview = await req.json();
 
     // validate user
     const user = await users.findOne({ 
-      $or: [{ _id: newInterview.id }, { email: newInterview.userEmail }] 
+      $or: [{ _id: newInterview.userId }, { email: newInterview.userEmail }] 
     });
     if (!user) {
       throw new Error("User not found")
@@ -38,12 +30,8 @@ export async function POST(req: Request) {
     }
 
     // validate job application
-    const sheet = await sheets.findOne({ userId: user._id })
-    if (!sheet) {
-      throw new Error("Sheet not found")
-    }
-    const jobApplication = sheet.applications.filter((application: JobApplication) => application._id === newInterview.applicationId)
-    if (jobApplication.length === 0) {
+    const application = await applications.findOne({ _id: newInterview.applicationId })
+    if (!application) {
       throw new Error("Job application not found")
     }
 

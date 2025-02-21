@@ -25,7 +25,7 @@ export default function EditStatusModal({ isOpen, onClose, onSave, application }
   }, [])
 
   const handleSave = () => {
-    onSave(application.id as string, status, statusDate)
+    onSave(application._id, status, statusDate)
     onClose()
   }
 

@@ -12,7 +12,7 @@ import type { JobApplication } from "@/types"
 const statusOptions = applicationStages.map((stage) => stage.name)
 
 type AddRowFormProps = {
-  onSubmit: (newApplication: JobApplication) => void
+  onSubmit: (newApplication: JobApplication | Partial<JobApplication>) => void
   onCancel: () => void
 }
 
@@ -26,8 +26,7 @@ export default function AddRowForm({ onSubmit, onCancel }: AddRowFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const newApplication: JobApplication = {
-      id: Date.now().toString(),
+    const newApplication: Partial<JobApplication> = {
       companyName,
       position,
       date,

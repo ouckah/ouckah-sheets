@@ -20,7 +20,7 @@ export default function EditJobApplicationModal({ isOpen, onClose, onSave, appli
   const [location, setLocation] = useState(application.location)
 
   const handleSave = () => {
-    onSave(application.id, { companyName, position, location })
+    onSave(application._id, { companyName, position, location })
     onClose()
   }
 
