@@ -81,6 +81,7 @@ export default function Sheet() {
     setIsEditingTitle(false)
     
     if (!session?.user?.email) {
+      setTitle("")
       toast({
         title: "Error",
         description: "You must be signed in to modify your sheet.",
@@ -103,6 +104,7 @@ export default function Sheet() {
         description: "The sheet details have been updated.",
       })
     } catch (error) {
+      setTitle("")
       console.error("Error updating sheet details:", error)
       toast({
         title: "Error",
@@ -311,6 +313,24 @@ export default function Sheet() {
   }, [applications, companyFilter, dateFilter, statusFilter])
 
   useEffect(() => {
+    const loadSheet = async () => {
+      setIsLoading(true)
+      if (status === "loading") return
+      if (status === "authenticated") {
+        const fetchedSheet = await fetchSheet()
+        if (!fetchedSheet) {
+          return
+        }
+        setTitle(fetchedSheet.title)
+        setIsPublic(fetchedSheet.visibility)
+      }
+      setIsLoading(false)
+    }
+
+    loadSheet()
+  }, [status, fetchSheet])
+
+  useEffect(() => {
     const loadApplications = async () => {
       setIsLoading(true)
       if (status === "loading") return
@@ -323,23 +343,6 @@ export default function Sheet() {
 
     loadApplications()
   }, [status, fetchApplications])
-
-  useEffect(() => {
-    const loadSheet = async () => {
-      setIsLoading(true)
-      if (status === "loading") return
-      if (status === "authenticated") {
-        const fetchedSheet = await fetchSheet()
-        if (!fetchedSheet) {
-          return
-        }
-        setTitle(fetchedSheet.title)
-        setIsPublic(fetchedSheet.visibility)
-      }
-    }
-
-    loadSheet()
-  }, [status, fetchSheet])
 
   if (isLoading) return <div>Loading...</div>
 
