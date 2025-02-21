@@ -19,6 +19,10 @@ import { PlusCircle, Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import type { Profile } from "@/types";
 
+type ProfileForm = Profile & {
+  sheetVisibility: boolean;
+};
+
 const initialProfile: Profile = {
   email: "",
   name: "",
@@ -52,7 +56,7 @@ export default function Profile() {
   const session = useSession();
   const user = session?.data?.user
 
-  const fetchUserProfile = async (userEmail: string): Promise<Profile | null> => {
+  const fetchUserProfile = async (userEmail: string): Promise<ProfileForm | null> => {
     try {
       const [profileResponse, sheetResponse] = await Promise.all([
         fetch(`/api/user/get/${userEmail}`),
@@ -174,6 +178,7 @@ export default function Profile() {
         const data = await fetchUserProfile(user?.email);
         if (data) {
           setProfile(data);
+          setSheetVisibility(data.sheetVisibility)
         } else {
           console.error("Failed to load profile");
         }
