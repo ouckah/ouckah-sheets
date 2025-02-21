@@ -44,7 +44,7 @@ export function InterviewList({ interviews, jobApplications, dateRange, selected
         ) : (
           <ul className="space-y-4">
             {sortedInterviews.map((interview) => {
-              const jobApplication = jobApplications.find((app) => app.id === interview.jobApplicationId)
+              const jobApplication = jobApplications.find((app) => app._id === interview.jobApplicationId)
               return (
                 <li key={interview.id} className="border-b pb-4 last:border-b-0">
                   <h3 className="font-semibold">{jobApplication?.companyName || "Unknown Company"}</h3>

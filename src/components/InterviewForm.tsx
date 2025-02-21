@@ -128,7 +128,7 @@ export function InterviewForm({
               </SelectTrigger>
               <SelectContent>
                 {jobApplications.map((app) => (
-                  <SelectItem key={app.id} value={app.id}>
+                  <SelectItem key={app._id} value={app._id}>
                     {app.companyName}
                   </SelectItem>
                 ))}
