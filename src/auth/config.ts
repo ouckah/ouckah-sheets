@@ -46,5 +46,4 @@ export const {
             return userCreated;
         },
     },
-    debug: true,
 })
