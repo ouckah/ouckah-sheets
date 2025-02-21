@@ -16,12 +16,11 @@ type DateRangeOption = "all" | "today" | "thisWeek" | "thisMonth" | "custom"
 
 const fetchJobApplications = async (email: string) => {
   try {
-    const response = await fetch(`/api/sheet/get/${email}`);
+    const response = await fetch(`/api/application/get/${email}`);
     if (!response.ok) throw new Error("Failed to fetch job applications");
     const data = await response.json();
-
-    const sheet = data.sheet;
-    const jobApplications = sheet.applications;
+    
+    const jobApplications = data.applications;
     return jobApplications;
   } catch (error) {
     console.error(error);
