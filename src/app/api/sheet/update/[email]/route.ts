@@ -9,6 +9,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ email: s
   try {
     const { email } = await params;
     const newSheet = await req.json();
+    console.log(newSheet)
 
     const client = await clientPromise
     const db = client.db("user-information")
@@ -21,18 +22,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ email: s
     }
 
     const updatedSheet = await sheets.findOneAndUpdate(
-      { userId: user._id },
+      { userId: user.email },
       { $set: newSheet },
       { returnDocument: "after" },
     )
-
-    // user profile connected fields
-    if (newSheet.hasOwnProperty("visibility")) {
-      await users.updateOne(
-        { _id: user._id },
-        { $set: { sheetVisibility: newSheet.visibility } }
-      );
-    }
 
     return NextResponse.json({ message: "Sheet updated", sheet: updatedSheet }, { status: 201 });
   } catch (error) {

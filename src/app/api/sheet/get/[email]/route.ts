@@ -20,9 +20,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ email: s
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // find sheet using the user's `_id`
+    // find sheet using the user's `email`
     const sheet = await sheets.findOne(
-      { userId: user._id },
+      { userId: user.email },
       { projection: { _id: 0, createdAt: 0, lastUpdated: 0 } }
     );
 

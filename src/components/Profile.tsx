@@ -17,30 +17,14 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import type { Profile } from "@/types";
 
-type ProfileData = {
-  email: string;
-  name: string;
-  pfp: string;
-  firstName: string;
-  lastName: string;
-  profilePicture: string;
-  location: string;
-  bio: string;
-  linkedin: string;
-  github: string;
-  sheetVisibility: boolean;
-  experiences: Array<{ title: string; company: string; duration: string }>;
-  education: Array<{ degree: string; institution: string; year: string }>;
-};
-
-const initialProfile: ProfileData = {
+const initialProfile: Profile = {
   email: "",
   name: "",
   pfp: "",
   firstName: "",
   lastName: "",
-  profilePicture: "",
   location: "",
   bio: "",
   linkedin: "",
@@ -59,25 +43,31 @@ const initialProfile: ProfileData = {
     //   year: "2020",
     // },
   ],
-  sheetVisibility: false,
 };
 
 export default function Profile() {
-  const [profile, setProfile] = useState<ProfileData>(initialProfile);
+  const [profile, setProfile] = useState<Profile>(initialProfile);
+  const [sheetVisibility, setSheetVisibility] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const session = useSession();
   const user = session?.data?.user
 
-  const fetchUserProfile = async (userEmail: string): Promise<ProfileData | null> => {
+  const fetchUserProfile = async (userEmail: string): Promise<Profile | null> => {
     try {
-      const request = await fetch(`/api/user/get/${userEmail}`);
-      const data = await request.json();
-      const profile = data.user;
+      const [profileResponse, sheetResponse] = await Promise.all([
+        fetch(`/api/user/get/${userEmail}`),
+        fetch(`/api/sheet/get/${userEmail}`),
+      ])
+      const profileData = await profileResponse.json()
+      const sheetData = await sheetResponse.json()
 
-      return profile;
+      const profile = profileData.user
+      const sheetVisibility = sheetData.sheet?.visibility || false
+
+      return { ...profile, sheetVisibility }
     } catch (error) {
-      console.error("Error fetching profile:", error);
-      return null;
+      console.error("Error fetching profile:", error)
+      return null
     }
   }
 
@@ -89,35 +79,42 @@ export default function Profile() {
   };
 
   const handleSwitchChange = (checked: boolean) => {
-    setProfile((prev) => ({ ...prev, sheetVisibility: checked }));
+    setSheetVisibility(checked)
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const request = await fetch(`/api/user/update/${user?.email}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
-      });
+      const [profileResponse, sheetResponse] = await Promise.all([
+        fetch(`/api/user/update/${user?.email}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(profile),
+        }),
+        fetch(`/api/sheet/update/${user?.email}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ visibility: sheetVisibility }),
+        }),
+      ])
 
-      if (!request.ok) {
-        throw new Error("Failed to update user:", await request.json());
+      if (!profileResponse.ok || !sheetResponse.ok) {
+        throw new Error("Failed to update user")
       }
 
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
-      });
+      })
     } catch (error) {
-      console.error(error);
+      console.error(error)
       toast({
         title: "Error",
         description: "Failed to update user profile.",
         variant: "destructive",
-      });
+      })
     }
-  };
+  }
 
   const addExperience = () => {
     setProfile((prev) => ({
@@ -322,7 +319,7 @@ export default function Profile() {
                 <Label htmlFor="sheetVisibility">Make my sheet public</Label>
                 <Switch
                   id="sheetVisibility"
-                  checked={profile.sheetVisibility}
+                  checked={sheetVisibility}
                   onCheckedChange={handleSwitchChange}
                 />
               </div>

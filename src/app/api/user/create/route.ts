@@ -37,15 +37,13 @@ export async function POST(req: Request) {
       github: "",
       experiences: [],
       education: [],
-      sheetVisibility: false,
       createdAt: new Date(),
     });
 
     // create associated sheet
     const newSheet = await sheets.insertOne({
-      userId: newUser.insertedId, // reference to user
+      userId: email, // reference to user
       title: `${name}'s Sheet`,
-      applications: [],
       visibility: false,
       createdAt: new Date(),
       lastUpdated: new Date(),

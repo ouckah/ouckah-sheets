@@ -13,7 +13,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ email: s
     const client = await clientPromise
     const db = client.db("user-information")
     const users = db.collection("users");
-    const sheets = db.collection("sheets");
 
     const updatedUser = await users.findOneAndUpdate(
       { email }, 
@@ -22,14 +21,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ email: s
     );
     if (!updatedUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
-
-    // sheet-based changes
-    if (newProfile.sheetVisibility !== undefined) {
-      await sheets.updateMany(
-        { userId: updatedUser._id }, // match all sheets associated with this user
-        { $set: { visibility: newProfile.sheetVisibility } }
-      );
     }
 
     return NextResponse.json({ message: "User updated", user: updatedUser }, { status: 201 });
