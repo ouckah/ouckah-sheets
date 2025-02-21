@@ -1,12 +1,23 @@
 import type { Config } from "tailwindcss";
 
+const colorClasses = [
+  "gray-200",
+	"blue-200",
+	"purple-200",
+	"yellow-200",
+	"green-200",
+];
+
 export default {
-    darkMode: ["class"],
-    content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+	darkMode: ["class"],
+	content: [
+		"./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+	safelist: [
+		...colorClasses.map((color) => `bg-${color}`)
+	],
   theme: {
   	extend: {
   		colors: {

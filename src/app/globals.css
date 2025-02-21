@@ -6,6 +6,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Colors for job application statuses, load in on build */
+.bg-gray-200, .bg-blue-200, .bg-purple-200, .bg-yellow-200, .bg-green-200 {
+  display: none;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
