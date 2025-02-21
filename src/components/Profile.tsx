@@ -241,7 +241,6 @@ export default function Profile() {
                     value={profile.firstName}
                     onChange={handleChange}
                     placeholder="John"
-                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -252,7 +251,6 @@ export default function Profile() {
                     value={profile.lastName}
                     onChange={handleChange}
                     placeholder="Doe"
-                    required
                   />
                 </div>
               </div>
